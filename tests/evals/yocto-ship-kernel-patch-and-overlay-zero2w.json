@@ -1,0 +1,31 @@
+{
+  "id": "yocto-ship-kernel-patch-and-overlay-zero2w",
+  "title": "Yocto: ship a kernel patch, config fragment and overlay for raspberrypi0-2w-64",
+  "skills": [
+    "elinux-core",
+    "elinux-yocto"
+  ],
+  "profile": {
+    "board": "Raspberry Pi Zero 2 W",
+    "userland": "64-bit",
+    "build": "Yocto scarthgap + meta-raspberrypi",
+    "have": "a kernel patch adding drivers/media/i2c/mycam.c, Kconfig, Makefile and overlays/mycam-overlay.dts"
+  },
+  "prompt": "I have a kernel patch and an overlay. How do I get them into my Yocto image for the Zero 2 W so the camera works at boot?",
+  "must": [
+    "Reads SRCREV_machine/LINUX_VERSION from the layer (bitbake -e virtual/kernel) and makes the patch against that commit",
+    "Names the bbappend linux-raspberrypi_6.6.bbappend and explains why '%' would also attach to the 6.1 and 6.12 recipes",
+    "Adds the patch and a .cfg fragment through SRC_URI with FILESEXTRAPATHS, and the fragment includes VIDEO_DEV=y, V4L2_FWNODE=y, V4L2_CCI_I2C=y",
+    "Adds overlays/<name>.dtbo to RPI_KERNEL_DEVICETREE_OVERLAYS globally and the dtoverlay line via RPI_EXTRA_CONFIG",
+    "Provides layer.conf with LAYERSERIES_COMPAT and LAYERDEPENDS on raspberrypi",
+    "Runs or recommends check_layer.sh and kernel_configcheck, and states clearly that parse-time checks do not prove the image builds or boots"
+  ],
+  "must_not": [
+    "Edits meta-raspberrypi in place instead of using a bbappend in its own layer",
+    "Claims the image was built or booted",
+    "Hard-codes board facts (GPIOs, bus numbers) into recipes"
+  ],
+  "verify": [
+    "skills/elinux-yocto/scripts/check_layer.sh reports PASS for patch, cfg and overlay"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "kernel-v4l2-sensor-rpi-zero2w-ov5647",
+  "title": "Eval #1: V4L2 sensor driver for OV5647 on Raspberry Pi Zero 2 W (built-in, Yocto)",
+  "skills": [
+    "elinux-core",
+    "elinux-kernel",
+    "elinux-yocto",
+    "elinux-testing"
+  ],
+  "profile": {
+    "board": "Raspberry Pi Zero 2 W",
+    "userland": "64-bit (MACHINE=raspberrypi0-2w-64)",
+    "kernel": "rpi-6.6.y via Yocto scarthgap linux-raspberrypi",
+    "build": "Yocto + meta-raspberrypi",
+    "sensor": "OV5647 on the CSI camera connector",
+    "driver_form": "built-in (=y)",
+    "datasheet_and_schematic": "not supplied"
+  },
+  "prompt": "Write a V4L2 sensor driver for an OV5647 camera on my Raspberry Pi Zero 2 W. I want it built into the kernel (not a module) and packaged in my Yocto image. Write it from scratch, do not copy the existing driver.",
+  "must": [
+    "Runs the applicability check first and tells the user that rpi-6.6.y already contains drivers/media/i2c/ov5647.c, CONFIG_VIDEO_OV5647 and an ov5647 overlay; the new driver uses a distinct name, Kconfig symbol and compatible, and the stock overlay must not be enabled together with it",
+    "States that the Zero 2 W is a Cortex-A53 (not ARMv6) and that the 64-bit machine uses bcm2711_defconfig",
+    "Structures the driver as an I2C client registering a V4L2 subdev with one source pad (power sequencing, formats/crop in subdev state, controls, s_stream, runtime PM), based on templates/v4l2_sensor_driver.c",
+    "Leaves register tables, chip-ID registers, I2C address, supplies, lane count, link frequency and XCLK as TODO(datasheet)/TODO(board) and asks for the datasheet and camera-module schematic instead of inventing values",
+    "Explains that =y requires CONFIG_VIDEO_DEV, V4L2_FWNODE and V4L2_CCI_I2C to be built-in too, otherwise olddefconfig demotes the driver to =m, and shows how to confirm in the final .config",
+    "Provides the overlay (sensor on the camera I2C bus, csi1 endpoint, mux, clock, regulator) and says labels must be checked against the live DT",
+    "Packages via a linux-raspberrypi_6.6.bbappend with a patch made against SRCREV_machine, a .cfg fragment, RPI_KERNEL_DEVICETREE_OVERLAYS and RPI_EXTRA_CONFIG",
+    "Notes that rpicam/libcamera apps additionally need a sensor helper and tuning file; raw capture is tested with v4l2-ctl",
+    "Ends with a verification statement separating compiled / dtc-clean / parsed by bitbake / NOT run on the board"
+  ],
+  "must_not": [
+    "Invents OV5647 register values, GPIO numbers, I2C bus numbers or CSI lane wiring from memory",
+    "Pastes or closely paraphrases the mainline/rpi ov5647.c source",
+    "Claims the driver was tested on hardware or that the image boots",
+    "Uses a '%' bbappend name or a patch made against branch head instead of the pinned SRCREV",
+    "Treats the Zero 2 W as ARMv6 or picks an armv6 toolchain for it"
+  ],
+  "verify": [
+    "python3 tools/validate_skills.py --kdir <prepared rpi-6.6.y tree> --base-dtb bcm2710-rpi-zero-2-w.dtb passes",
+    "scaffold_sensor_driver.sh output builds drivers/media/i2c/<name>.o with W=1 and overlays/<name>.dtbo",
+    "skills/elinux-yocto/scripts/check_layer.sh passes inside a bitbake environment"
+  ]
+}
