@@ -1,0 +1,66 @@
+# Cross-compile Makefile for a small C application: one source, many targets.
+#
+#   make TARGET=aarch64                  # Pi Zero 2 W/3/4/5, RZ/G2L, R-Car
+#   make TARGET=armv6  SYSROOT=/path     # Pi Zero / Zero W (needs ARMv6 sysroot)
+#   make TARGET=native                   # host build for unit tests
+#   make SYSROOT=/path/to/sysroot TARGET=aarch64 CROSS_COMPILE=aarch64-none-linux-gnu-
+#
+# The Yocto recipe and the Buildroot package call "make" or CMake from this
+# same tree and pass CC/CFLAGS/LDFLAGS themselves; they must NOT need edits
+# here (see elinux-buildsys-generic/references/one-source-three-adapters.md).
+
+TARGET        ?= native
+APP           ?= app
+SRCS          ?= $(wildcard src/*.c)
+BUILD         ?= build-$(TARGET)
+DESTDIR       ?=
+PREFIX        ?= /usr
+SYSROOT       ?=
+
+ifeq ($(TARGET),aarch64)
+CROSS_COMPILE ?= aarch64-linux-gnu-
+ARCH_FLAGS    ?=
+else ifeq ($(TARGET),armv6)
+CROSS_COMPILE ?= arm-linux-gnueabihf-
+ARCH_FLAGS    ?= -marm -mcpu=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard
+else ifeq ($(TARGET),native)
+CROSS_COMPILE ?=
+else
+$(error unknown TARGET '$(TARGET)': use aarch64, armv6 or native)
+endif
+
+# Respect CC from the environment when an outer build system (Yocto/Buildroot)
+# provides it; otherwise derive from CROSS_COMPILE.
+ifeq ($(origin CC),default)
+CC := $(CROSS_COMPILE)gcc
+endif
+
+ifneq ($(SYSROOT),)
+SYSROOT_FLAGS := --sysroot=$(SYSROOT)
+endif
+
+CFLAGS  ?= -O2 -g
+CFLAGS  += -Wall -Wextra -std=gnu11 $(ARCH_FLAGS) $(SYSROOT_FLAGS)
+LDFLAGS += $(SYSROOT_FLAGS)
+
+OBJS := $(patsubst src/%.c,$(BUILD)/%.o,$(SRCS))
+
+all: $(BUILD)/$(APP)
+
+$(BUILD)/$(APP): $(OBJS)
+	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+
+$(BUILD)/%.o: src/%.c | $(BUILD)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -MMD -MP -c -o $@ $<
+
+$(BUILD):
+	mkdir -p $@
+
+install: $(BUILD)/$(APP)
+	install -D -m 0755 $< $(DESTDIR)$(PREFIX)/bin/$(APP)
+
+clean:
+	rm -rf build-*
+
+-include $(OBJS:.o=.d)
+.PHONY: all install clean
