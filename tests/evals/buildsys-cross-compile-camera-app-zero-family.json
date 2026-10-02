@@ -1,0 +1,30 @@
+{
+  "id": "buildsys-cross-compile-camera-app-zero-family",
+  "title": "Cross-compile a C++ capture app for Zero 2 W (64-bit) and the original Zero",
+  "skills": [
+    "elinux-core",
+    "elinux-buildsys-generic"
+  ],
+  "profile": {
+    "boards": "Raspberry Pi Zero 2 W (64-bit image) and Raspberry Pi Zero W",
+    "host": "x86-64 Ubuntu",
+    "uses": "libcamera-independent V4L2 capture, one external library via pkg-config"
+  },
+  "prompt": "I need to cross-compile my C++ capture app from my Ubuntu PC for both a Zero 2 W (64-bit) and an original Zero W. Give me the toolchain files and the commands.",
+  "must": [
+    "Chooses the ABI from the rootfs bitness: aarch64 for the 64-bit Zero 2 W, an ARMv6 hard-float setup for the Zero W",
+    "Warns that a distro arm-linux-gnueabihf toolchain links an ARMv7 libc, so binaries for the Zero W need an ARMv6 toolchain/sysroot (Yocto/Buildroot SDK or crosstool-ng)",
+    "Mentions -marm for ARMv6 hard-float on Thumb-default toolchains",
+    "Uses a target sysroot with pkg-config restricted to it, and CMake find-root modes",
+    "Verifies the result with file and readelf -A (CPU arch tag), and says qemu cannot prove ARMv6 correctness",
+    "Keeps one CMake core so Yocto and Buildroot can reuse it (one source, three adapters)"
+  ],
+  "must_not": [
+    "Uses -mcpu=cortex-a53 flags for the original Zero",
+    "Claims the ARMv6 binary was tested without running it on a Zero",
+    "Links against host libraries or the distro armhf sysroot for the Zero W"
+  ],
+  "verify": [
+    "Templates elinux-buildsys-generic/templates/toolchain-*.cmake and Makefile.cross build with the installed cross compilers (tools/validate_skills.py)"
+  ]
+}
