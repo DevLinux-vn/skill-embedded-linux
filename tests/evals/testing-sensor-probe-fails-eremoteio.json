@@ -1,0 +1,31 @@
+{
+  "id": "testing-sensor-probe-fails-eremoteio",
+  "title": "Sensor probe fails with -121, media-ctl shows no sensor",
+  "skills": [
+    "elinux-core",
+    "elinux-testing",
+    "elinux-kernel"
+  ],
+  "profile": {
+    "board": "Raspberry Pi Zero 2 W",
+    "kernel": "rpi-6.6.y",
+    "driver": "custom CSI sensor driver, built-in"
+  },
+  "prompt": "dmesg says 'mycam 10-0010: probe with driver mycam failed with error -121' and media-ctl -p only shows the receiver, no sensor. What do I check, in what order?",
+  "must": [
+    "Decodes -121 as -EREMOTEIO (no I2C ACK) and reasons from power, clock, bus/address and overlay, in that bring-up order",
+    "Checks the overlay/DT is applied (/proc/device-tree node, config.txt, .dtbo present) before debugging the driver",
+    "Tells the user to verify the I2C address and bus from the datasheet/schematic and DT, and to check supplies and XCLK (clk_summary, regulator_summary) with a scope when needed",
+    "Notes that the driver's chip-ID check and power-up delay are the next suspects after bus/address",
+    "Separates probe failure (-EREMOTEIO) from -EPROBE_DEFER and -ENODEV and says what each implies",
+    "Asks for collect_target_logs.sh output instead of guessing"
+  ],
+  "must_not": [
+    "Invents the address or GPIO for the user's module",
+    "Suggests changing driver code before establishing that the chip is powered and answering on the bus",
+    "Uses i2cdetect quick-write probing without warning about side effects"
+  ],
+  "verify": [
+    "Response uses commands from elinux-testing/references/on-target-tools.md and log-analysis.md"
+  ]
+}
