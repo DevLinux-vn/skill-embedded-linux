@@ -1,0 +1,7 @@
+{
+  "name": "embedded-linux-skills",
+  "version": "0.1.0",
+  "description": "Skills for embedded Linux development: kernel, userspace, Yocto, Buildroot, cross builds and testing for Raspberry Pi, BeagleBone Black and Renesas boards.",
+  "license": "MIT",
+  "skills": "./skills"
+}
