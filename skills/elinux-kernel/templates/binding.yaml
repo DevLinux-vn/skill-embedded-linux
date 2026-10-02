@@ -1,0 +1,90 @@
+# SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
+%YAML 1.2
+---
+$id: http://devicetree.org/schemas/media/i2c/vendor,mysensor.yaml#
+$schema: http://devicetree.org/meta-schemas/core.yaml#
+
+title: MYSENSOR MIPI CSI-2 image sensor
+
+maintainers:
+  - Your Name <you@example.com>
+
+description: |
+  Raw Bayer CSI-2 sensor controlled over I2C. TEMPLATE - every value marked
+  TODO must come from the sensor datasheet / camera-module schematic.
+
+allOf:
+  - $ref: /schemas/media/video-interface-devices.yaml#
+
+properties:
+  compatible:
+    const: vendor,mysensor   # TODO: real vendor prefix (vendor-prefixes.yaml)
+
+  reg:
+    maxItems: 1               # TODO(datasheet): address
+
+  clocks:
+    maxItems: 1
+
+  avdd-supply:
+    description: Analog supply (TODO(board) - names must match the driver).
+
+  dovdd-supply:
+    description: I/O supply.
+
+  dvdd-supply:
+    description: Digital core supply.
+
+  reset-gpios:
+    maxItems: 1
+    description: Optional reset/power-down line (active level per DT flag).
+
+  port:
+    $ref: /schemas/graph.yaml#/$defs/port-base
+    additionalProperties: false
+
+    properties:
+      endpoint:
+        $ref: /schemas/media/video-interfaces.yaml#
+        unevaluatedProperties: false
+
+        properties:
+          data-lanes:
+            minItems: 1
+            maxItems: 2        # TODO(datasheet)
+
+          link-frequencies: true
+
+        required:
+          - data-lanes
+          - link-frequencies
+
+required:
+  - compatible
+  - reg
+  - clocks
+  - port
+
+unevaluatedProperties: false
+
+examples:
+  - |
+    i2c {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        camera@10 {
+            compatible = "vendor,mysensor";
+            reg = <0x10>;
+            clocks = <&cam_clk>;
+            avdd-supply = <&cam_reg>;
+            port {
+                endpoint {
+                    remote-endpoint = <&csi_ep>;
+                    data-lanes = <1 2>;
+                    link-frequencies = /bits/ 64 <400000000>;
+                };
+            };
+        };
+    };
+...

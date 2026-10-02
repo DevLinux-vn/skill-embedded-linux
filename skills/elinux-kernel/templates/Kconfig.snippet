@@ -1,0 +1,19 @@
+# Insert into drivers/media/i2c/Kconfig, inside the VIDEO_CAMERA_SENSOR
+# block next to the other sensor drivers (alphabetical by vendor/part).
+# scripts/scaffold_sensor_driver.sh does this for you.
+#
+# Built-in (=y) also needs CONFIG_VIDEO_DEV=y, CONFIG_V4L2_FWNODE=y and
+# CONFIG_V4L2_CCI_I2C=y on defconfigs where they are modules; otherwise
+# olddefconfig silently demotes this symbol to =m.
+
+config VIDEO_MYSENSOR
+	tristate "MYSENSOR sensor support"
+	select V4L2_CCI_I2C
+	help
+	  This is a Video4Linux2 sensor driver for the MYSENSOR camera.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called mysensor.
+
+# And in drivers/media/i2c/Makefile:
+#   obj-$(CONFIG_VIDEO_MYSENSOR) += mysensor.o
