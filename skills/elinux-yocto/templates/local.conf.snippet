@@ -1,0 +1,13 @@
+# Build configuration snippet for raspberrypi0-2w-64 (64-bit Zero 2 W),
+# meta-raspberrypi scarthgap. Verified by parsing with bitbake -p; not built.
+MACHINE = "raspberrypi0-2w-64"
+
+# Ship the overlay (.dtbo) in the boot partition. The default list in
+# meta-raspberrypi does not include every sensor overlay.
+RPI_KERNEL_DEVICETREE_OVERLAYS:append = " overlays/mycam.dtbo"
+
+# Ask the firmware to apply it (written into config.txt by rpi-config).
+RPI_EXTRA_CONFIG = "\ndtoverlay=mycam\n"
+
+# Optional for bring-up: camera tools in the image.
+IMAGE_INSTALL:append = " v4l-utils i2c-tools"
