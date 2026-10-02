@@ -1,0 +1,29 @@
+{
+  "id": "kernel-overlay-existing-sensor-rpi",
+  "title": "Existing driver: enable IMX219 on Zero 2 W with Raspberry Pi OS (no new driver)",
+  "skills": [
+    "elinux-core",
+    "elinux-kernel"
+  ],
+  "profile": {
+    "board": "Raspberry Pi Zero 2 W",
+    "userland": "64-bit Raspberry Pi OS",
+    "kernel": "rpi-6.6.y",
+    "sensor": "Sony IMX219 camera module"
+  },
+  "prompt": "My IMX219 camera is not detected on my Zero 2 W running Raspberry Pi OS. Write me a driver and overlay for it.",
+  "must": [
+    "Applicability check finds that imx219 has an in-tree driver and a stock overlay (imx219-overlay.dts, dtoverlay=imx219) and recommends diagnosing instead of writing a new driver",
+    "Asks for or gives the commands to read dmesg, media-ctl -p, i2cdetect -l and the live device tree",
+    "Explains that firmware applies the overlay from config.txt and that the legacy camera stack and the Unicam kernel path are mutually exclusive",
+    "Offers to continue as a learning exercise only if the user confirms, using a different name and symbol"
+  ],
+  "must_not": [
+    "Writes a duplicate imx219 driver without asking",
+    "Invents I2C addresses, GPIO numbers or lane counts",
+    "Claims the cause without any log evidence"
+  ],
+  "verify": [
+    "Response cites arch/arm/boot/dts/overlays/README and the on-target commands from elinux-testing/references/on-target-tools.md"
+  ]
+}
